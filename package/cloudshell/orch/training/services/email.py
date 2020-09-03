@@ -44,7 +44,8 @@ class EmailService:
         self._sandbox_output = sandbox_output_service
         self._logger = logger
 
-    def send_email(self, to_email_address: List[str], subject: str, link: str, template_parameters: Dict[str, str],
+    def send_email(self, to_email_address: List[str], subject: str, link: str,
+                   template_parameters: Dict[str, str] = {},
                    template_name: str = 'default',
                    cc_email_address: List[str] = None):
 
