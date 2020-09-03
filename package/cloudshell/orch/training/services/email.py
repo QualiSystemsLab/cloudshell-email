@@ -49,6 +49,11 @@ class EmailService:
                    template_name: str = 'default',
                    cc_email_address: List[str] = None):
 
+        if len(to_email_address) == 0:
+            self._sandbox_output.notify('Empty list of email addresses')
+            return
+
+        invalid_emails = []
         for email_address in to_email_address:
             if not self._is_valid_email_address(email_address):
                 self._sandbox_output.notify(f'{email_address} is not a valid email address')
