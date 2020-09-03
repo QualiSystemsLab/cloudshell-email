@@ -56,8 +56,20 @@ class EmailService:
         invalid_emails = []
         for email_address in to_email_address:
             if not self._is_valid_email_address(email_address):
-                self._sandbox_output.notify(f'{email_address} is not a valid email address')
-                return
+                invalid_emails.append(email_address)
+
+        for email_address in cc_email_address:
+            if not self._is_valid_email_address(email_address):
+                invalid_emails.append(email_address)
+
+        invalid_string = ','.join(invalid_emails)
+
+        if len(invalid_emails) == 1:
+            self._sandbox_output.notify(f'{invalid_string} is not a valid email address')
+            return
+        elif len(invalid_emails) > 1:
+            self._sandbox_output.notify(f'{invalid_string} are not valid email addresses')
+            return
 
         message = self._load_and_format_template(template_name, link, **template_parameters)
 
