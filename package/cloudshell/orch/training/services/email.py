@@ -45,8 +45,8 @@ class EmailService:
         self._logger = logger
 
     def send_email(self, to_email_address: List[str], subject: str, link: str,
-                   template_parameters: Dict[str, str] = {},
                    template_name: str = 'default',
+                   template_parameters: Dict[str, str] = {},
                    cc_email_address: List[str] = None):
 
         if len(to_email_address) == 0:
