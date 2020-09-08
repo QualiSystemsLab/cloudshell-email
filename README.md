@@ -7,7 +7,7 @@ Python package to easily add email functionality to orchestration scripts run fr
 
 ## Why use cloudshell-email
 - Send emails containing a link to the Sandbox
-- Send emails based html templates
+- Send emails based on html templates
 
 ## Installing
     $ python -m pip install cloudshell-email
