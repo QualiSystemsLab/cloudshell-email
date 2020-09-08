@@ -15,7 +15,7 @@ default_html = '''
     <h2 style="text-align: center;"><span style="color: #F76723;"><strong>Welcome to Training</strong></span></h2>
 </div>
 <div>
-    <p><span style="color: #000000;">Please retain this email_service as it is how you will access your online lab environment. It also contains your credentials (if needed) and links to helpful materials.</span></p>
+    <p><span style="color: #000000;">Please retain this email as it is how you will access your online lab environment. It also contains your credentials (if needed) and links to helpful materials.</span></p>
 </div>
 <div>
     <p><span style="color: #000000;">I&rsquo;m looking forward to our class together</span></p>
@@ -49,7 +49,7 @@ class EmailService:
                    cc_email_address: List[str] = []):
 
         if len(to_email_address) == 0:
-            self._sandbox_output.notify('Empty list of email_service addresses')
+            self._sandbox_output.notify('Empty list of email addresses')
             return
 
         invalid_emails = []
@@ -64,10 +64,10 @@ class EmailService:
         invalid_string = ','.join(invalid_emails)
 
         if len(invalid_emails) == 1:
-            self._sandbox_output.notify(f'{invalid_string} is not a valid email_service address')
+            self._sandbox_output.notify(f'{invalid_string} is not a valid email address')
             return
         elif len(invalid_emails) > 1:
-            self._sandbox_output.notify(f'{invalid_string} are not valid email_service addresses')
+            self._sandbox_output.notify(f'{invalid_string} are not valid email addresses')
             return
 
         message = self._load_and_format_template(template_name, link, **template_parameters)
@@ -104,7 +104,7 @@ class EmailService:
             )
             smtp.close()
         except Exception:
-            self._logger.exception(f'Failed to send email_service to {to_address}')
+            self._logger.exception(f'Failed to send email to {to_address}')
             raise
 
     def _load_and_format_template(self, template_name, sandbox_link, **extra_args):
@@ -117,7 +117,7 @@ class EmailService:
                     html_string = f.read()
                     content = html_string.format(sandbox_link=sandbox_link, **extra_args)
         except Exception:
-            self._logger.exception('Failed loading email_service template')
+            self._logger.exception('Failed loading email template')
             raise
 
         return content
