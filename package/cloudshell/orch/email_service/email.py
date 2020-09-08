@@ -1,13 +1,12 @@
 import logging
 import re
-import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Dict, List
 
-from cloudshell.orch.training.models.email_config import EmailConfig
-from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
+from cloudshell.orch.email_service.email_config import EmailConfig
+from cloudshell.orch.email_service.sandbox_output import SandboxOutputService
 
 default_html = '''
 <!DOCTYPE html>
@@ -16,7 +15,7 @@ default_html = '''
     <h2 style="text-align: center;"><span style="color: #F76723;"><strong>Welcome to Training</strong></span></h2>
 </div>
 <div>
-    <p><span style="color: #000000;">Please retain this email as it is how you will access your online lab environment. It also contains your credentials (if needed) and links to helpful materials.</span></p>
+    <p><span style="color: #000000;">Please retain this email_service as it is how you will access your online lab environment. It also contains your credentials (if needed) and links to helpful materials.</span></p>
 </div>
 <div>
     <p><span style="color: #000000;">I&rsquo;m looking forward to our class together</span></p>
@@ -47,10 +46,10 @@ class EmailService:
     def send_email(self, to_email_address: List[str], subject: str, link: str,
                    template_name: str = 'default',
                    template_parameters: Dict[str, str] = {},
-                   cc_email_address: List[str] = None):
+                   cc_email_address: List[str] = []):
 
         if len(to_email_address) == 0:
-            self._sandbox_output.notify('Empty list of email addresses')
+            self._sandbox_output.notify('Empty list of email_service addresses')
             return
 
         invalid_emails = []
@@ -65,10 +64,10 @@ class EmailService:
         invalid_string = ','.join(invalid_emails)
 
         if len(invalid_emails) == 1:
-            self._sandbox_output.notify(f'{invalid_string} is not a valid email address')
+            self._sandbox_output.notify(f'{invalid_string} is not a valid email_service address')
             return
         elif len(invalid_emails) > 1:
-            self._sandbox_output.notify(f'{invalid_string} are not valid email addresses')
+            self._sandbox_output.notify(f'{invalid_string} are not valid email_service addresses')
             return
 
         message = self._load_and_format_template(template_name, link, **template_parameters)
@@ -105,21 +104,20 @@ class EmailService:
             )
             smtp.close()
         except Exception:
-            self._logger.exception(f'Failed to send email to {to_address}')
+            self._logger.exception(f'Failed to send email_service to {to_address}')
             raise
 
     def _load_and_format_template(self, template_name, sandbox_link, **extra_args):
-        content = None
 
         try:
-            if os.path.isfile(template_name):
+            if template_name == 'default':
+                content = default_html.format(sandbox_link=sandbox_link)
+            else:
                 with open(template_name, 'r') as f:
                     html_string = f.read()
                     content = html_string.format(sandbox_link=sandbox_link, **extra_args)
-            else:
-                content = default_html.format(sandbox_link=sandbox_link)
         except Exception:
-            self._logger.exception('Failed loading email template')
+            self._logger.exception('Failed loading email_service template')
             raise
 
         return content
