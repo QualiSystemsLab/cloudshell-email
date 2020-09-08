@@ -17,9 +17,9 @@ Python package to easily add email functionality to orchestration scripts run fr
 ```
 import logging
 from cloudshell.workflow.orchestration.sandbox import Sandbox
-from cloudshell.orch.training.services.sandbox_output import SandboxOutputService
-from cloudshell.orch.training.models.email_config import EmailConfig
-from cloudshell.orch.training.services.email import EmailService
+from cloudshell.orch.email_service.sandbox_output import SandboxOutputService
+from cloudshell.orch.email_service.email_config import EmailConfig
+from cloudshell.orch.email_service.email import EmailService
 
 sandbox = Sandbox()
 email_config = EmailConfig('SMTP Server hostname', 'username', 'password', 'Email_to_send_from', SMTP_Port = 587)
@@ -31,9 +31,9 @@ email_service = EmailService(email_config, sandbox_output_service, sandbox.logge
 ### Send Emails
 ```
 send_email(self, to_email_address: List[str], subject: str, link: str,
-                 template_name: str = None,
+                 template_name: str = 'default',
                  template_parameters: Dict[str, str] = {},
-                 cc_email_address: List[str] = None)
+                 cc_email_address: List[str] = [])
 ```
 Send emails using the above method of EmailService.
 

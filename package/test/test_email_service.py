@@ -3,7 +3,7 @@ from unittest.mock import patch, mock_open
 
 from mock import Mock, ANY
 
-from cloudshell.orch.training.services.email import EmailService
+from cloudshell.orch.email_service.email import EmailService
 
 
 default_html = '''
@@ -137,7 +137,7 @@ class TestEmailService(unittest.TestCase):
         mock_isfile.return_value = False
 
         # act
-        content = self.email_service._load_and_format_template('', link)
+        content = self.email_service._load_and_format_template('default', link)
 
         # assert
         self.assertEqual(content, default_html.format(sandbox_link=link))
