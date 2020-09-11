@@ -1,4 +1,6 @@
+[![Build Status](https://travis-ci.org/QualiSystemsLab/cloudshell-email.svg?branch=master)](https://travis-ci.org/QualiSystems/cloudshell-email) [![Coverage Status](https://coveralls.io/repos/github/QualiSystemsLab/cloudshell-email/badge.svg?branch=master)](https://coveralls.io/github/QualiSystemsLab/cloudshell-email?branch=master)
 
+---
 
 ![quali](quali.png)
 
