@@ -17,20 +17,18 @@ Python package to easily add email functionality to orchestration scripts run fr
 ```
 import logging
 from cloudshell.workflow.orchestration.sandbox import Sandbox
-from cloudshell.orch.email_service.sandbox_output import SandboxOutputService
 from cloudshell.orch.email_service.email_config import EmailConfig
 from cloudshell.orch.email_service.email import EmailService
 
 sandbox = Sandbox()
 email_config = EmailConfig('SMTP Server hostname', 'username', 'password', 'Email_to_send_from', SMTP_Port = 587)
-sandbox_output_service = SandboxOutputService(sandbox, debug_enabled)
 
-email_service = EmailService(email_config, sandbox_output_service, sandbox.logger)
+email_service = EmailService(email_config, sandbox.logger)
 ```
 
 ### Send Emails
-```
-send_email(self, to_email_address: List[str], subject: str, link: str,
+```python
+send_email(self, to_email_address: List[str], subject: str,
                  template_name: str = 'default',
                  template_parameters: Dict[str, str] = {},
                  cc_email_address: List[str] = [])
@@ -39,10 +37,49 @@ Send emails using the above method of EmailService.
 
 - to_email_address: Email addresses to send email to
 - subject: Subject line of email
-- link: Sandbox link to add to email
-- template_name: Path to html file containing email template
+- template_name: Path to local html file containing email template
 - template_parameters: Parameter name:values to fill into html template
 - cc_email_address: Email addresses to CC on email
+
+### Html Templates
+Html templates will be opened from the template_path on the machine running the orchestration scripts.
+
+The default html template is if no template_name parameter is given:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<div>
+    <h2 style="text-align: center;"><span style="color: #F76723;"><strong>Welcome to cloudshell-email</strong></span></h2>
+</div>
+<div>
+    <p><span style="color: #000000;">This is the default html template using the cloudshell-email package.</span></p>
+</div>
+<div>
+    <p><span style="color: #000000;">The cloudshell-email package can be used to send emails to users from orchestration scripts.</span></p>
+</div>
+<div>
+    <p><span style="color: #000000;"><strong>You can view cloudshell-email usage guide here:</strong></span></p>
+</div>
+<div>
+    <span style="color: #000000;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="https://github.com/QualiSystemsLab/cloudshell-email"> Github Repo </a>
+    </span>
+</div>
+</body>
+</html>
+```
+
+Variables can be placed into the html to be replaced with the template_parameters input as so:
+```html
+<div>
+    <p><span style="color: #000000;">Variable 1: {variable1}, Variable 2: {variable2}.</span></p>
+</div>
+```
+
+template_parameters for the above html would be:
+```python
+{'variable1': 'Value 1', 'variable2': 'Value 2'}
+```
 
 ## Troubleshooting and Help
 
