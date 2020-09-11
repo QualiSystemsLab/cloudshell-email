@@ -38,7 +38,7 @@ class EmailService:
         self._email_config = email_config
         self._logger = logger
 
-    def send_email(self, to_email_address: List[str], subject: str, link: str,
+    def send_email(self, to_email_address: List[str], subject: str,
                    template_name: str = 'default',
                    template_parameters: Dict[str, str] = {},
                    cc_email_address: List[str] = []):
@@ -65,7 +65,7 @@ class EmailService:
             self._logger.exception(f'{invalid_string} are not valid email addresses')
             raise Exception(f'{invalid_string} are not valid email addresses')
 
-        message = self._load_and_format_template(template_name, link, **template_parameters)
+        message = self._load_and_format_template(template_name, **template_parameters)
 
         self._send(to_email_address, subject, message, cc_email_address)
 
@@ -102,15 +102,15 @@ class EmailService:
             self._logger.exception(f'Failed to send email to {to_address}')
             raise Exception(f'Failed to send email to {to_address}')
 
-    def _load_and_format_template(self, template_name, sandbox_link, **extra_args):
+    def _load_and_format_template(self, template_name, **extra_args):
 
         try:
             if template_name == 'default':
-                content = default_html.format(sandbox_link=sandbox_link)
+                content = default_html
             else:
                 with open(template_name, 'r') as f:
                     html_string = f.read()
-                    content = html_string.format(sandbox_link=sandbox_link, **extra_args)
+                    content = html_string.format(**extra_args)
         except Exception:
             self._logger.exception('Failed loading email template')
             raise Exception('Failed loading email template')
