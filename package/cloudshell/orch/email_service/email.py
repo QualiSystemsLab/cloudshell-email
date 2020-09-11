@@ -6,7 +6,6 @@ from email.mime.text import MIMEText
 from typing import Dict, List
 
 from cloudshell.orch.email_service.email_config import EmailConfig
-from cloudshell.orch.email_service.sandbox_output import SandboxOutputService
 
 default_html = '''
 <!DOCTYPE html>
@@ -35,9 +34,8 @@ default_html = '''
 
 class EmailService:
 
-    def __init__(self, email_config: EmailConfig, sandbox_output_service: SandboxOutputService, logger: logging.Logger):
+    def __init__(self, email_config: EmailConfig, logger: logging.Logger):
         self._email_config = email_config
-        self._sandbox_output = sandbox_output_service
         self._logger = logger
 
     def send_email(self, to_email_address: List[str], subject: str, link: str,
@@ -46,8 +44,8 @@ class EmailService:
                    cc_email_address: List[str] = []):
 
         if len(to_email_address) == 0:
-            self._sandbox_output.notify('Empty list of email addresses')
-            return
+            self._logger.exception('Empty list of email addresses')
+            raise Exception('Empty list of email addresses')
 
         invalid_emails = []
         for email_address in to_email_address:
@@ -61,11 +59,11 @@ class EmailService:
         invalid_string = ','.join(invalid_emails)
 
         if len(invalid_emails) == 1:
-            self._sandbox_output.notify(f'{invalid_string} is not a valid email address')
-            return
+            self._logger.exception(f'{invalid_string} is not a valid email address')
+            raise Exception(f'{invalid_string} is not a valid email address')
         elif len(invalid_emails) > 1:
-            self._sandbox_output.notify(f'{invalid_string} are not valid email addresses')
-            return
+            self._logger.exception(f'{invalid_string} are not valid email addresses')
+            raise Exception(f'{invalid_string} are not valid email addresses')
 
         message = self._load_and_format_template(template_name, link, **template_parameters)
 
@@ -102,7 +100,7 @@ class EmailService:
             smtp.close()
         except Exception:
             self._logger.exception(f'Failed to send email to {to_address}')
-            raise
+            raise Exception(f'Failed to send email to {to_address}')
 
     def _load_and_format_template(self, template_name, sandbox_link, **extra_args):
 
@@ -115,6 +113,6 @@ class EmailService:
                     content = html_string.format(sandbox_link=sandbox_link, **extra_args)
         except Exception:
             self._logger.exception('Failed loading email template')
-            raise
+            raise Exception('Failed loading email template')
 
         return content
