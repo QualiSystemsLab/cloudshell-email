@@ -10,6 +10,30 @@ default_html = '''
 <!DOCTYPE html>
 <html lang="en">
 <div>
+    <h2 style="text-align: center;"><span style="color: #F76723;"><strong>Welcome to cloudshell-email</strong></span></h2>
+</div>
+<div>
+    <p><span style="color: #000000;">This is the default html template using the cloudshell-email package.</span></p>
+</div>
+<div>
+    <p><span style="color: #000000;">The cloudshell-email package can be used to send emails to users from orchestration scripts.</span></p>
+</div>
+<div>
+    <p><span style="color: #000000;"><strong>You can view cloudshell-email usage guide here:</strong></span></p>
+</div>
+<div>
+    <span style="color: #000000;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="https://github.com/QualiSystemsLab/cloudshell-email"> Github Repo </a>
+    </span>
+</div>
+</body>
+</html>
+'''
+
+arg_html = '''
+<!DOCTYPE html>
+<html lang="en">
+<div>
     <h2 style="text-align: center;"><span style="color: #F76723;"><strong>Welcome to Training</strong></span></h2>
 </div>
 <div>
@@ -38,7 +62,6 @@ not_default_html = '''
 '''
 
 args_html = '''
-{sandbox_link}
 {arg1}
 {arg2}
 {arg3}
@@ -49,48 +72,69 @@ class TestEmailService(unittest.TestCase):
 
     def setUp(self) -> None:
         self.email_config = Mock()
-        self.sandbox_output_service = Mock()
         self.logger = Mock()
-        self.email_service = EmailService(self.email_config, self.sandbox_output_service, self.logger)
+        self.email_service = EmailService(self.email_config, self.logger)
 
     def test_send_no_email_address(self):
         # arrange
+        self.email_service._load_and_format_template = Mock()
         self.email_service._send = Mock()
 
         # act
-        self.email_service.send_email([], Mock(), Mock(), Mock())
+        excepted = False
+        try:
+            self.email_service.send_email([], Mock())
+        except Exception as e:
+            excepted = True
+            self.assertEqual(e.args[0], 'Empty list of email addresses')
 
         # assert
-        self.sandbox_output_service.notify.assert_called_once_with('Empty list of email addresses')
-        self.email_service._send.aseert_not_called()
+        self.assertTrue(excepted)
+        self.email_service._load_and_format_template.assert_not_called()
+        self.email_service._send.assert_not_called()
 
     def test_send_email_invalid_address(self):
         # arrange
+        self.email_service._load_and_format_template = Mock()
         self.email_service._send = Mock()
         invalid_email = 'aaa@bbb'
 
-        # act
-        self.email_service.send_email([invalid_email], Mock(), Mock(), Mock())
+        #act
+        excepted = False
+        try:
+            self.email_service.send_email([invalid_email], Mock())
+        except Exception as e:
+            excepted = True
+            self.assertEqual(e.args[0], 'aaa@bbb is not a valid email address')
 
         # assert
-        self.sandbox_output_service.notify.assert_called_once_with(f'{invalid_email} is not a valid email address')
-        self.email_service._send.aseert_not_called()
+        self.assertTrue(excepted)
+        self.email_service._load_and_format_template.assert_not_called()
+        self.email_service._send.assert_not_called()
 
     def test_send_email_valid_and_invalid_address(self):
         # arrange
+        self.email_service._load_and_format_template = Mock()
         self.email_service._send = Mock()
         valid_email = 'aaa@bbb.com'
         invalid_email = 'aaa@bbb'
 
         # act
-        self.email_service.send_email([valid_email, invalid_email], Mock(), Mock(), Mock())
+        excepted = False
+        try:
+            self.email_service.send_email([valid_email, invalid_email], Mock())
+        except Exception as e:
+            excepted = True
+            self.assertEqual(e.args[0], 'aaa@bbb is not a valid email address')
 
         # assert
-        self.sandbox_output_service.notify.assert_called_once_with(f'{invalid_email} is not a valid email address')
-        self.email_service._send.aseert_not_called()
+        self.assertTrue(excepted)
+        self.email_service._load_and_format_template.assert_not_called()
+        self.email_service._send.assert_not_called()
 
     def test_send_email_mulitple_valid_and_invalid_address(self):
         # arrange
+        self.email_service._load_and_format_template = Mock()
         self.email_service._send = Mock()
         valid_email = 'aaa@bbb.com'
         valid_email2 = 'aaa2@bbb.com'
@@ -102,14 +146,21 @@ class TestEmailService(unittest.TestCase):
         emails = [invalid_email, invalid_email2, valid_email, valid_email2, invalid_email3, valid_email3]
 
         # act
-        self.email_service.send_email(emails, Mock(), Mock(), Mock())
+        excepted = False
+        try:
+            self.email_service.send_email(emails, Mock())
+        except Exception as e:
+            excepted = True
+            self.assertEqual(e.args[0], 'aaa@bbb,aaa2@bbb,aaa3@bbb are not valid email addresses')
 
         # assert
-        self.sandbox_output_service.notify.assert_called_once_with(f'{invalid_email},{invalid_email2},{invalid_email3} are not valid email addresses')
-        self.email_service._send.aseert_not_called()
+        self.assertTrue(excepted)
+        self.email_service._load_and_format_template.assert_not_called()
+        self.email_service._send.assert_not_called()
 
     def test_cc_send_email_mulitple_valid_and_invalid_address(self):
         # arrange
+        self.email_service._load_and_format_template = Mock()
         self.email_service._send = Mock()
         valid_email = 'aaa@bbb.com'
         valid_email2 = 'aaa2@bbb.com'
@@ -121,75 +172,121 @@ class TestEmailService(unittest.TestCase):
         emails = [invalid_email, invalid_email2, valid_email, valid_email2, invalid_email3, valid_email3]
 
         # act
-        self.email_service.send_email([valid_email], Mock(), Mock(), Mock(), cc_email_address=emails)
+        excepted = False
+        try:
+            self.email_service.send_email(emails, Mock())
+        except Exception as e:
+            excepted = True
+            self.assertEqual(e.args[0], 'aaa@bbb,aaa2@bbb,aaa3@bbb are not valid email addresses')
 
         # assert
-        self.sandbox_output_service.notify.assert_called_once_with(f'{invalid_email},{invalid_email2},{invalid_email3} are not valid email addresses')
-        self.email_service._send.aseert_not_called()
+        self.assertTrue(excepted)
+        self.email_service._load_and_format_template.assert_not_called()
+        self.email_service._send.assert_not_called()
 
-    @patch('os.path.isfile')
-    def test_load_default_template(self, mock_isfile):
+    def test_is_valid_email_address_pass(self):
+        valid_email = 'aaa@bbb.com'
+
+        self.assertTrue(self.email_service._is_valid_email_address(valid_email))
+
+    def test_is_valid_email_address_fail(self):
+        invalid_email = 'aaa@bbb'
+
+        self.assertFalse(self.email_service._is_valid_email_address(invalid_email))
+
+    def test_load_default_template(self):
         # arrange
         self.email_service._send = Mock()
-        valid_email = 'aaa@bbb.com'
-        link = 'Default Link'
-
-        mock_isfile.return_value = False
 
         # act
-        content = self.email_service._load_and_format_template('default', link)
+        content = self.email_service._load_and_format_template('default')
 
         # assert
-        self.assertEqual(content, default_html.format(sandbox_link=link))
+        self.assertEqual(content, default_html)
 
-    @patch('os.path.isfile')
-    def test_load_template(self, mock_isfile):
+    def test_load_template(self):
         # arrange
         self.email_service._send = Mock()
-        valid_email = 'aaa@bbb.com'
-        link = 'Default Link'
 
-        mock_isfile.return_value = True
+        arg = dict()
+        arg['sandbox_link'] = 'Portal Link'
 
         # act
         with patch("builtins.open", mock_open(read_data=not_default_html)) as mock_file:
-            content = self.email_service._load_and_format_template('', link)
+            content = self.email_service._load_and_format_template('', **arg)
 
         # assert
-        self.assertEqual(content, not_default_html.format(sandbox_link=link))
+        self.assertEqual(content, not_default_html.format(**arg))
 
-    @patch('os.path.isfile')
-    def test_load_template_with_args(self, mock_isfile):
+    def test_load_template_with_args(self):
         # arrange
         self.email_service._send = Mock()
-        valid_email = 'aaa@bbb.com'
-        link = 'Default Link'
 
         extra_args = dict()
         extra_args['arg1'] = 'argument1'
         extra_args['arg2'] = 'argument2'
         extra_args['arg3'] = 'argument3'
 
-        mock_isfile.return_value = True
-
         # act
         with patch("builtins.open", mock_open(read_data=args_html)) as mock_file:
-            content = self.email_service._load_and_format_template('', link, **extra_args)
+            content = self.email_service._load_and_format_template('', **extra_args)
 
         # assert
-        self.assertEqual(content, args_html.format(sandbox_link=link, **extra_args))
+        self.assertEqual(content, args_html.format(**extra_args))
 
-    @patch('os.path.isfile')
-    def test_send_email(self, mock_isfile):
+    @patch('builtins.open', side_effect=Exception())
+    def test_load_template_exception(self, mock_open):
         # arrange
         self.email_service._send = Mock()
-        email = 'aaa@bbb.com'
-        link = 'Default Link'
-
-        mock_isfile.return_value = False
 
         # act
-        self.email_service.send_email([email], 'Default Subject', link, cc_email_address=[email])
+        excepted = False
+        try:
+            self.email_service._load_and_format_template('')
+        except Exception as e:
+            excepted = True
+            self.assertEqual(e.args[0], 'Failed loading email template')
+        self.assertTrue(excepted)
+
+    @patch('smtplib.SMTP')
+    def test_send(self, mock_smtp):
+        # arrange
+        email = 'aaa@bbb.com'
+        self.email_service._email_config.from_address = 'aaa@bbb.com'
+
+        smtp_obj = Mock()
+        smtp_obj.ehlo = Mock()
+        smtp_obj.starttls = Mock()
+        smtp_obj.login = Mock()
+        smtp_obj.sendmail = Mock()
+        smtp_obj.close = Mock()
+
+        mock_smtp.return_value = smtp_obj
+
+        # act
+        self.email_service._send([email], 'Default Subject', arg_html, [email])
 
         # assert
-        self.email_service._send.assert_called_once_with([email], 'Default Subject', default_html.format(sandbox_link=link), [email])
+        mock_smtp.return_value.ehlo.assert_called_once()
+        mock_smtp.return_value.starttls.assert_called_once()
+        mock_smtp.return_value.login.assert_called_once()
+        mock_smtp.return_value.sendmail.assert_called_once()
+        mock_smtp.return_value.close.assert_called_once()
+
+    @patch('smtplib.SMTP', side_effect=Exception())
+    def test_send_exception(self, mock_smtp):
+        # arrange
+        email = 'aaa@bbb.com'
+        self.email_service._email_config.from_address = email = 'aaa@bbb.com'
+
+        # act
+        excepted = False
+        try:
+            self.email_service._send([email], 'Default Subject', arg_html, [email])
+        except Exception as e:
+            excepted = True
+            self.assertEqual(e.args[0], "Failed to send email to ['aaa@bbb.com']")
+        self.assertTrue(excepted)
+
+
+
