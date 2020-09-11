@@ -12,23 +12,20 @@ default_html = '''
 <!DOCTYPE html>
 <html lang="en">
 <div>
-    <h2 style="text-align: center;"><span style="color: #F76723;"><strong>Welcome to Training</strong></span></h2>
+    <h2 style="text-align: center;"><span style="color: #F76723;"><strong>Welcome to cloudshell-email</strong></span></h2>
 </div>
 <div>
-    <p><span style="color: #000000;">Please retain this email as it is how you will access your online lab environment. It also contains your credentials (if needed) and links to helpful materials.</span></p>
+    <p><span style="color: #000000;">This is the default html template using the cloudshell-email package.</span></p>
 </div>
 <div>
-    <p><span style="color: #000000;">I&rsquo;m looking forward to our class together</span></p>
+    <p><span style="color: #000000;">The cloudshell-email package can be used to send emails to users from orchestration scripts.</span></p>
 </div>
 <div>
-    <p><span style="color: #000000;"><strong>To access your CloudShell Environment please use the following:</strong></span></p>
-</div>
-<div>
-    <span style="color: #000000;"><span style="color: #F76723;"><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Environment details:</strong></span></span><br>
+    <p><span style="color: #000000;"><strong>You can view cloudshell-email usage guide here:</strong></span></p>
 </div>
 <div>
     <span style="color: #000000;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <a href="{sandbox_link}"> Environment Link </a>
+        <a href="https://github.com/QualiSystemsLab/cloudshell-email"> Github Repo </a>
     </span>
 </div>
 </body>
