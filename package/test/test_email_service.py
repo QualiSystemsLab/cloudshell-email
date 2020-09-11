@@ -174,7 +174,7 @@ class TestEmailService(unittest.TestCase):
         # act
         excepted = False
         try:
-            self.email_service.send_email(emails, Mock())
+            self.email_service.send_email([valid_email], Mock(), cc_email_address=emails)
         except Exception as e:
             excepted = True
             self.assertEqual(e.args[0], 'aaa@bbb,aaa2@bbb,aaa3@bbb are not valid email addresses')
@@ -183,6 +183,19 @@ class TestEmailService(unittest.TestCase):
         self.assertTrue(excepted)
         self.email_service._load_and_format_template.assert_not_called()
         self.email_service._send.assert_not_called()
+
+    def test_cc_send_email_valid(self):
+        # arrange
+        self.email_service._load_and_format_template = Mock()
+        self.email_service._send = Mock()
+        valid_email = 'aaa@bbb.com'
+
+        # act
+        self.email_service.send_email([valid_email], Mock())
+
+        # assert
+        self.email_service._load_and_format_template.assert_called_once()
+        self.email_service._send.assert_called_once()
 
     def test_is_valid_email_address_pass(self):
         valid_email = 'aaa@bbb.com'
