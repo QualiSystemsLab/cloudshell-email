@@ -1,6 +1,10 @@
 # cloudshell-email
 
-[![Build Status](https://travis-ci.org/QualiSystemsLab/cloudshell-email.svg?branch=master)](https://travis-ci.org/github/QualiSystemsLab/cloudshell-email) [![Coverage Status](https://coveralls.io/repos/github/QualiSystemsLab/cloudshell-email/badge.svg?branch=master)](https://coveralls.io/github/QualiSystemsLab/cloudshell-email?branch=master)
+[![Build Status](https://travis-ci.org/QualiSystemsLab/cloudshell-email.svg?branch=master)](https://travis-ci.org/github/QualiSystemsLab/cloudshell-email)
+[![Coverage Status](https://coveralls.io/repos/github/QualiSystemsLab/cloudshell-email/badge.svg?branch=master)](https://coveralls.io/github/QualiSystemsLab/cloudshell-email?branch=master)
+[![Maintainability](https://img.shields.io/codeclimate/maintainability/QualiSystemsLab/cloudshell-email)](https://img.shields.io/codeclimate/maintainability/QualiSystemsLab/cloudshell-email)
+[![Technical Debt](https://img.shields.io/codeclimate/tech-debt/QualiSystemsLab/cloudshell-email)](https://img.shields.io/codeclimate/tech-debt/QualiSystemsLab/cloudshell-email)
+[![Issues](https://img.shields.io/codeclimate/issues/QualiSystemsLab/cloudshell-email)](https://img.shields.io/codeclimate/issues/QualiSystemsLab/cloudshell-email)
 
 
 ![quali](quali.png)
