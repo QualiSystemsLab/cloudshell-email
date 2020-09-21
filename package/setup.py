@@ -24,7 +24,7 @@ setup(
         include_package_data=True,
         keywords="sandbox cloud training cloudshell",
         classifiers=[
-            "Development Status :: 1 - Beta",
+            "Development Status :: 4 - Beta",
             "Topic :: Software Development :: Libraries",
             "License :: OSI Approved :: Apache Software License",
         ]
