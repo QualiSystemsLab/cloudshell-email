@@ -3,7 +3,7 @@ from unittest.mock import patch, mock_open
 
 from mock import Mock, ANY
 
-from cloudshell.orch.email_service.email_config import EmailConfig
+from cloudshell.email.email_config import EmailConfig
 
 
 class TestEmailConfig(unittest.TestCase):
