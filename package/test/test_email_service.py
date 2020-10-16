@@ -3,7 +3,7 @@ from unittest.mock import patch, mock_open
 
 from mock import Mock, ANY
 
-from cloudshell.email import EmailService
+from cloudshell.email.email import EmailService
 
 
 default_html = '''
