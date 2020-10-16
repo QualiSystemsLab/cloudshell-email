@@ -38,6 +38,9 @@ class EmailService:
         self._email_config = email_config
         self._logger = logger
 
+    def is_email_configured(self) -> bool:
+        return True if self._email_config else False
+
     def send_email(self, to_email_address: List[str], subject: str,
                    template_name: str = 'default',
                    template_parameters: Dict[str, str] = {},
