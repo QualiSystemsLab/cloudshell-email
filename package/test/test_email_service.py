@@ -301,5 +301,6 @@ class TestEmailService(unittest.TestCase):
             self.assertEqual(e.args[0], "Failed to send email to ['aaa@bbb.com']")
         self.assertTrue(excepted)
 
-
+    def test_is_email_configured(self):
+        self.assertTrue(self.email_service.is_email_configured())
 
