@@ -304,3 +304,7 @@ class TestEmailService(unittest.TestCase):
     def test_is_email_configured(self):
         self.assertTrue(self.email_service.is_email_configured())
 
+    def test_is_not_email_configured(self):
+        self.email_service._email_config = None
+        self.assertFalse(self.email_service.is_email_configured())
+
