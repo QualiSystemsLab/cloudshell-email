@@ -65,21 +65,21 @@ class EmailService:
             self._logger.exception(f'{invalid_string} are not valid email addresses')
             raise Exception(f'{invalid_string} are not valid email addresses')
 
-        if self.default_html:
-            if self.default_parameters:
-                if self.default_subject:
-                    self._send(to_email_address, self.default_subject,
-                               self.default_html.format(**self.default_parameters), cc_email_address)
+        if self._email_config.default_html:
+            if self._email_config.default_parameters:
+                if self._email_config.default_subject:
+                    self._send(to_email_address, self._email_config.default_subject,
+                               self._email_config.default_html.format(**self._email_config.default_parameters), cc_email_address)
                 else:
                     self._send(to_email_address, subject,
-                               self.default_html.format(**self.default_parameters), cc_email_address)
+                               self._email_config.default_html.format(**self._email_config.default_parameters), cc_email_address)
             else:
-                if self.default_subject:
-                    self._send(to_email_address, self.default_subject,
-                               self.default_html.format(**template_parameters), cc_email_address)
+                if self._email_config.default_subject:
+                    self._send(to_email_address, self._email_config.default_subject,
+                               self._email_config.default_html.format(**template_parameters), cc_email_address)
                 else:
                     self._send(to_email_address, subject,
-                               self.default_html.format(**template_parameters), cc_email_address)
+                               self._email_config.default_html.format(**template_parameters), cc_email_address)
         else:
             message = self._load_and_format_template(template_name, **template_parameters)
             self._send(to_email_address, subject, message, cc_email_address)
