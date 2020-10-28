@@ -2,7 +2,8 @@ from typing import Dict
 
 
 class EmailConfig:
-    def __init__(self, smtp_server: str, user: str, password: str, from_address: str, smtp_port=587):
+    def __init__(self, smtp_server: str, user: str, password: str, from_address: str, smtp_port=587,
+                 default_subject: str = '', default_html: str = '', default_parameters: Dict[str, str] = {}):
         """
         :param smtp_server:
         :param user: must in an email_service address format
@@ -15,3 +16,6 @@ class EmailConfig:
         self.password = password
         self.from_address = from_address
         self.smtp_port = smtp_port
+        self.default_subject = default_subject
+        self.default_html = default_html
+        self.default_parameters = default_parameters
