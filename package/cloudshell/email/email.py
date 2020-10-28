@@ -38,7 +38,7 @@ class EmailService:
         self._email_config = email_config
         self._logger = logger
 
-    def send_email(self, to_email_address: List[str], subject: str,
+    def send_email(self, to_email_address: List[str], subject: str = '',
                    template_name: str = 'default',
                    template_parameters: Dict[str, str] = {},
                    cc_email_address: List[str] = []):
