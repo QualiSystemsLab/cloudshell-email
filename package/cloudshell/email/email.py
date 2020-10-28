@@ -67,6 +67,9 @@ class EmailService:
 
         if self._email_config.default_html:
             if self._email_config.default_parameters:
+                if template_parameters:
+                    self._email_config.default_parameters.update(template_parameters)
+
                 if self._email_config.default_subject:
                     self._send(to_email_address, self._email_config.default_subject,
                                self._email_config.default_html.format(**self._email_config.default_parameters), cc_email_address)
