@@ -27,7 +27,8 @@ from cloudshell.orch.email_service.email_config import EmailConfig
 from cloudshell.orch.email_service.email import EmailService
 
 sandbox = Sandbox()
-email_config = EmailConfig('SMTP Server hostname', 'username', 'password', 'Email_to_send_from', SMTP_Port = 587)
+email_config = EmailConfig('SMTP Server hostname', 'username', 'password', 'Email_to_send_from', SMTP_Port = 587,
+                           default_html='', default_subject='', defauly_parameters={})
 
 email_service = EmailService(email_config, sandbox.logger)
 ```
@@ -41,6 +42,7 @@ send_email(self, to_email_address: List[str],
                  cc_email_address: List[str] = [])
 ```
 Send emails using the above method of EmailService.
+Default values added to the email config object will override these values.
 
 - to_email_address: Email addresses to send email to
 - subject: Subject line of email

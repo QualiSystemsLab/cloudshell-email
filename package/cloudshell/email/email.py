@@ -41,7 +41,7 @@ class EmailService:
     def is_email_configured(self) -> bool:
         return True if self._email_config else False
 
-    def send_email(self, to_email_address: List[str], subject: str,
+    def send_email(self, to_email_address: List[str], subject: str = '',
                    template_name: str = 'default',
                    template_parameters: Dict[str, str] = {},
                    cc_email_address: List[str] = []):
@@ -68,9 +68,27 @@ class EmailService:
             self._logger.exception(f'{invalid_string} are not valid email addresses')
             raise Exception(f'{invalid_string} are not valid email addresses')
 
-        message = self._load_and_format_template(template_name, **template_parameters)
+        if self._email_config.default_html:
+            if self._email_config.default_parameters:
+                if template_parameters:
+                    self._email_config.default_parameters.update(template_parameters)
 
-        self._send(to_email_address, subject, message, cc_email_address)
+                if self._email_config.default_subject:
+                    self._send(to_email_address, self._email_config.default_subject,
+                               self._email_config.default_html.format(**self._email_config.default_parameters), cc_email_address)
+                else:
+                    self._send(to_email_address, subject,
+                               self._email_config.default_html.format(**self._email_config.default_parameters), cc_email_address)
+            else:
+                if self._email_config.default_subject:
+                    self._send(to_email_address, self._email_config.default_subject,
+                               self._email_config.default_html.format(**template_parameters), cc_email_address)
+                else:
+                    self._send(to_email_address, subject,
+                               self._email_config.default_html.format(**template_parameters), cc_email_address)
+        else:
+            message = self._load_and_format_template(template_name, **template_parameters)
+            self._send(to_email_address, subject, message, cc_email_address)
 
     def _is_valid_email_address(self, email):
         regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
