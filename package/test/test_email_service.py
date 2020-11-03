@@ -188,6 +188,7 @@ class TestEmailService(unittest.TestCase):
         # arrange
         self.email_service._load_and_format_template = Mock()
         self.email_service._send = Mock()
+        self.email_service._email_config.default_html = None
         valid_email = 'aaa@bbb.com'
 
         # act
