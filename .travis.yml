@@ -3,5 +3,5 @@ install:
 language: python
 python:
   - "3.8"
-script: python package/runtests.py --with-coverage --cover-package=cloudshell
+script: coverage run -m unittest discover
 after_success: coveralls
