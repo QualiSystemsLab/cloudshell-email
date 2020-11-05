@@ -7,5 +7,5 @@ install:
 language: python
 python:
   - "3.8"
-script: coverage run --source=cloudshell -m unittest discover
+script: coverage run -m unittest discover
 after_success: coveralls
