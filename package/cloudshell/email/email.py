@@ -5,7 +5,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Dict, List
 
-from cloudshell.email import EmailConfig
+from cloudshell.email.email import EmailConfig
 
 default_html = '''
 <!DOCTYPE html>
