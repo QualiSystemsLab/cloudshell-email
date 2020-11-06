@@ -4,3 +4,4 @@ branch = True
 omit =
         *__init__*
         package/test/*
+        home/*
