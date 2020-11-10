@@ -1,7 +1,0 @@
-# .coveragerc to control coverage.py
-[run]
-branch = True
-omit =
-        *__init__*
-        package/test/*
-        /home/*
