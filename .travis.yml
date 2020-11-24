@@ -1,7 +1,16 @@
-install:
-  - pip install -r package/test_requirements.txt
 language: python
 python:
   - "3.8"
-script: python package/runtests.py --with-coverage --cover-package=cloudshell
-after_success: coveralls
+
+install:
+  - pip install -r package/test_requirements.txt
+  - pip install -r package/requirements.txt
+
+script:
+  - pushd package
+  - python setup.py develop
+  - coverage run --source=cloudshell --omit="*__init__*" -m unittest discover
+  - coverage report
+
+after_success:
+  - coveralls
