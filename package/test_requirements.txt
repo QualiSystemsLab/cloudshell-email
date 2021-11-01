@@ -1,5 +1,4 @@
 mock
-freeze
 nose
 coverage
 coveralls
