@@ -137,3 +137,19 @@ class EmailService:
             raise Exception('Failed loading email template')
 
         return content
+
+    def validate_email_config(self):
+
+        try:
+            smtp = smtplib.SMTP(
+                host=self._email_config.smtp_server,
+                port=self._email_config.smtp_port
+            )
+            smtp.ehlo()
+            smtp.starttls()
+            smtp.login(self._email_config.user, self._email_config.password)
+            smtp.close()
+        except Exception as e:
+            self._logger.exception('Failed to login to SMTP server')
+            raise Exception('Failed to login to SMTP server')
+

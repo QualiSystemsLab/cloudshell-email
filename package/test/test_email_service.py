@@ -309,3 +309,38 @@ class TestEmailService(unittest.TestCase):
         self.email_service._email_config = None
         self.assertFalse(self.email_service.is_email_configured())
 
+    @patch('smtplib.SMTP')
+    def test_validate_email_config(self, mock_smtp):
+        # arrange
+        smtp_obj = Mock()
+        smtp_obj.ehlo = Mock()
+        smtp_obj.starttls = Mock()
+        smtp_obj.login = Mock()
+        smtp_obj.close = Mock()
+        mock_smtp.return_value = smtp_obj
+
+        # act
+        self.email_service.validate_email_config()
+
+        # assert
+        mock_smtp.return_value.ehlo.assert_called_once()
+        mock_smtp.return_value.starttls.assert_called_once()
+        mock_smtp.return_value.login.assert_called_once()
+        mock_smtp.return_value.close.assert_called_once()
+
+    @patch('smtplib.SMTP', side_effect=Exception())
+    def test_validate_email_config_exception(self, mock_smtp):
+        # arrange
+        # side_effect=Exception()
+
+        # act
+        excepted = False
+        try:
+            self.email_service.validate_email_config()
+        except Exception as e:
+            excepted = True
+            # assert
+            self.assertEqual(e.args[0], 'Failed to login to SMTP server')
+        # assert
+        self.assertTrue(excepted)
+
