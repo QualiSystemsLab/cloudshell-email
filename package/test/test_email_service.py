@@ -4,7 +4,7 @@ from unittest.mock import patch, mock_open
 from mock import Mock, ANY
 
 from cloudshell.email.email_service import EmailService
-
+import smtplib
 
 default_html = '''
 <!DOCTYPE html>
@@ -99,7 +99,7 @@ class TestEmailService(unittest.TestCase):
         self.email_service._send = Mock()
         invalid_email = 'aaa@bbb'
 
-        #act
+        # act
         excepted = False
         try:
             self.email_service.send_email([invalid_email], Mock())
@@ -268,14 +268,7 @@ class TestEmailService(unittest.TestCase):
         email = 'aaa@bbb.com'
         self.email_service._email_config.from_address = 'aaa@bbb.com'
 
-        smtp_obj = Mock()
-        smtp_obj.ehlo = Mock()
-        smtp_obj.starttls = Mock()
-        smtp_obj.login = Mock()
-        smtp_obj.sendmail = Mock()
-        smtp_obj.close = Mock()
-
-        mock_smtp.return_value = smtp_obj
+        mock_smtp.return_value = Mock()
 
         # act
         self.email_service._send([email], 'Default Subject', arg_html, [email])
@@ -287,20 +280,26 @@ class TestEmailService(unittest.TestCase):
         mock_smtp.return_value.sendmail.assert_called_once()
         mock_smtp.return_value.close.assert_called_once()
 
-    @patch('smtplib.SMTP', side_effect=Exception())
+    @patch('smtplib.SMTP')
     def test_send_exception(self, mock_smtp):
         # arrange
-        email = 'aaa@bbb.com'
-        self.email_service._email_config.from_address = email = 'aaa@bbb.com'
+        from_address = 'aaa@bbb.com'
+        to_address = 'ccc@ddd.com'
+        cc = 'eee@fff.com'
+        self.email_service._email_config.from_address = from_address
+        smtp_obj = Mock()
+        smtp_obj.sendmail.side_effect = smtplib.SMTPRecipientsRefused('Failed to send email: '
+                                                                      'All recipients were refused.')
+        mock_smtp.return_value = smtp_obj
 
         # act
-        excepted = False
-        try:
-            self.email_service._send([email], 'Default Subject', arg_html, [email])
-        except Exception as e:
-            excepted = True
-            self.assertEqual(e.args[0], "Failed to send email to ['aaa@bbb.com']")
-        self.assertTrue(excepted)
+        # assert
+        with self.assertRaises(smtplib.SMTPRecipientsRefused) as cm:
+            self.email_service._send([to_address], 'Default Subject', arg_html, [cc])
+        self.assertEqual(
+            str(cm.exception.args[0]),
+            'Failed to send email: All recipients were refused.'
+        )
 
     def test_is_email_configured(self):
         self.assertTrue(self.email_service.is_email_configured())
@@ -312,12 +311,7 @@ class TestEmailService(unittest.TestCase):
     @patch('smtplib.SMTP')
     def test_validate_email_config(self, mock_smtp):
         # arrange
-        smtp_obj = Mock()
-        smtp_obj.ehlo = Mock()
-        smtp_obj.starttls = Mock()
-        smtp_obj.login = Mock()
-        smtp_obj.close = Mock()
-        mock_smtp.return_value = smtp_obj
+        mock_smtp.return_value = Mock()
 
         # act
         self.email_service.validate_email_config()
@@ -328,19 +322,19 @@ class TestEmailService(unittest.TestCase):
         mock_smtp.return_value.login.assert_called_once()
         mock_smtp.return_value.close.assert_called_once()
 
-    @patch('smtplib.SMTP', side_effect=Exception())
+    @patch('smtplib.SMTP')
     def test_validate_email_config_exception(self, mock_smtp):
         # arrange
-        # side_effect=Exception()
+        smtp_obj = Mock()
+        smtp_obj.login.side_effect = smtplib.SMTPHeloError('-1', 'Failed to login to SMTP server')
+        mock_smtp.return_value = smtp_obj
 
         # act
-        excepted = False
-        try:
-            self.email_service.validate_email_config()
-        except Exception as e:
-            excepted = True
-            # assert
-            self.assertEqual(e.args[0], 'Failed to login to SMTP server')
         # assert
-        self.assertTrue(excepted)
+        with self.assertRaises(smtplib.SMTPHeloError) as cm:
+            self.email_service.validate_email_config()
+        self.assertEqual(
+            str(cm.exception.args[1]),
+            'Failed to login to SMTP server'
+        )
 
