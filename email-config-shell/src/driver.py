@@ -5,7 +5,7 @@ from cloudshell.shell.core.session.logging_session import LoggingSessionContext
 from cloudshell.shell.core.session.cloudshell_session import CloudShellSessionContext
 from cloudshell.core.context.error_handling_context import ErrorHandlingContext
 from cloudshell.email import EmailConfig, EmailService
-#from data_model import *  # run 'shellfoundry generate' to generate data model classes
+from data_model import EmailConfigShell
 
 
 class EmailConfigShellDriver (ResourceDriverInterface):
@@ -41,20 +41,19 @@ class EmailConfigShellDriver (ResourceDriverInterface):
         :rtype: AutoLoadDetails
         """
 
-        with LoggingSessionContext(context) as logger:
-            with ErrorHandlingContext(logger):
-                with CloudShellSessionContext(context) as session:
-                    decrypted_password = session.DecryptPassword(
-                                   context.resource.attributes['Email Config Shell.Password']).Value
-                    emailconfig = EmailConfig(
-                        context.resource.attributes.get('Email Config Shell.SMTP Server'),
-                        context.resource.attributes.get('Email Config Shell.User'),
-                        decrypted_password,
-                        context.resource.attributes.get('Email Config Shell.From Address'),
-                        context.resource.attributes.get('Email Config Shell.SMTP Port')
-                    )
-                    emailservice = EmailService(emailconfig, logger)
-                    emailservice.validate_email_config()
+        with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
+            with CloudShellSessionContext(context) as session:
+                email_config_shell = EmailConfigShell.create_from_context(context)
+                decrypted_password = session.DecryptPassword(email_config_shell.password).Value
+                emailconfig = EmailConfig(
+                    email_config_shell.smtp_server,
+                    email_config_shell.user,
+                    decrypted_password,
+                    email_config_shell.from_address,
+                    email_config_shell.smtp_port
+                )
+                emailservice = EmailService(emailconfig, logger)
+                emailservice.validate_email_config()
 
         return AutoLoadDetails([], [])
 

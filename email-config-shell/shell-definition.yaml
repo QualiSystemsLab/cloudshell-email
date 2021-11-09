@@ -52,6 +52,8 @@ node_types:
             type: string
           From Address:
             type: string
+          Portal URL:
+            type: string
           hide_address:
             type: string
             default: true
