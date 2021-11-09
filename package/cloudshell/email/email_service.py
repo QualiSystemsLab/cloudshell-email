@@ -159,8 +159,8 @@ class EmailService:
             self._logger.exception('Failed to send email: SMTPUTF8 was given in the mail_options '
                                    'but is not supported by the server.')
             raise
-
-        smtp.close()
+        finally:
+            smtp.close()
 
     def _load_and_format_template(self, template_name, **extra_args):
 
@@ -189,9 +189,5 @@ class EmailService:
             smtplib.SMTPException
             RuntimeError
         """
-        try:
-            smtp = self._login()
-            smtp.close()
-        except (smtplib.SMTPHeloError, smtplib.SMTPAuthenticationError,
-                smtplib.SMTPNotSupportedError, smtplib.SMTPException, RuntimeError):
-            raise
+        smtp = self._login()
+        smtp.close()

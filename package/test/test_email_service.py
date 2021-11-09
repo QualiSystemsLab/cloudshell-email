@@ -281,7 +281,7 @@ class TestEmailService(unittest.TestCase):
         mock_smtp.return_value.close.assert_called_once()
 
     @patch('smtplib.SMTP')
-    def test_send_exception(self, mock_smtp):
+    def test_send_smtprecipientsrefused(self, mock_smtp):
         # arrange
         from_address = 'aaa@bbb.com'
         to_address = 'ccc@ddd.com'
@@ -299,6 +299,77 @@ class TestEmailService(unittest.TestCase):
         self.assertEqual(
             str(cm.exception.args[0]),
             'Failed to send email: All recipients were refused.'
+        )
+
+    @patch('smtplib.SMTP')
+    def test_send_smtpsenderrefused(self, mock_smtp):
+        # arrange
+        from_address = 'aaa@bbb.com'
+        to_address = 'ccc@ddd.com'
+        cc = 'eee@fff.com'
+        self.email_service._email_config.from_address = from_address
+        smtp_obj = Mock()
+        smtp_obj.sendmail.side_effect = smtplib.SMTPSenderRefused('-1',
+                                                                  'The server didn\'t accept the '
+                                                                  'from_addr.',
+                                                                  from_address)
+        mock_smtp.return_value = smtp_obj
+
+        # act
+        # assert
+        with self.assertRaises(smtplib.SMTPSenderRefused) as cm:
+            self.email_service._send([to_address], 'Default Subject', arg_html, [cc])
+        self.assertEqual(
+            str(cm.exception.args[1]),
+            'The server didn\'t accept the from_addr.'
+        )
+
+    @patch('smtplib.SMTP')
+    def test_send_smtpdataerror(self, mock_smtp):
+        # arrange
+        from_address = 'aaa@bbb.com'
+        to_address = 'ccc@ddd.com'
+        cc = 'eee@fff.com'
+        self.email_service._email_config.from_address = from_address
+        smtp_obj = Mock()
+        smtp_obj.sendmail.side_effect = smtplib.SMTPDataError('-1',
+                                                              'The server replied with an '
+                                                              'unexpected error code.')
+        mock_smtp.return_value = smtp_obj
+
+        # act
+        # assert
+        with self.assertRaises(smtplib.SMTPDataError) as cm:
+            self.email_service._send([to_address], 'Default Subject', arg_html, [cc])
+        self.assertEqual(
+            str(cm.exception.args[1]),
+            'The server replied with an unexpected error code.'
+        )
+
+    @patch('smtplib.SMTP')
+    def test_send_smtpnotsupportederror(self, mock_smtp):
+        # arrange
+        from_address = 'aaa@bbb.com'
+        to_address = 'ccc@ddd.com'
+        cc = 'eee@fff.com'
+        self.email_service._email_config.from_address = from_address
+        smtp_obj = Mock()
+        smtp_obj.sendmail.side_effect = smtplib.SMTPNotSupportedError('One or more source or '
+                                                                      'delivery addresses require '
+                                                                      'internationalized email '
+                                                                      'support, but the server '
+                                                                      'does not advertise the '
+                                                                      'required SMTPUTF8 capability.')
+        mock_smtp.return_value = smtp_obj
+
+        # act
+        # assert
+        with self.assertRaises(smtplib.SMTPNotSupportedError) as cm:
+            self.email_service._send([to_address], 'Default Subject', arg_html, [cc])
+        self.assertEqual(
+            str(cm.exception.args[1]),
+            'One or more source or delivery addresses require internationalized email support, '
+            'but the server does not advertise the required SMTPUTF8 capability.'
         )
 
     def test_is_email_configured(self):
@@ -323,7 +394,7 @@ class TestEmailService(unittest.TestCase):
         mock_smtp.return_value.close.assert_called_once()
 
     @patch('smtplib.SMTP')
-    def test_validate_email_config_exception(self, mock_smtp):
+    def test_validate_email_config_smtpheloerror(self, mock_smtp):
         # arrange
         smtp_obj = Mock()
         smtp_obj.login.side_effect = smtplib.SMTPHeloError('-1', 'Failed to login to SMTP server')
@@ -338,3 +409,70 @@ class TestEmailService(unittest.TestCase):
             'Failed to login to SMTP server'
         )
 
+    @patch('smtplib.SMTP')
+    def test_validate_email_config_smtpauthenticationerror(self, mock_smtp):
+        # arrange
+        smtp_obj = Mock()
+        smtp_obj.login.side_effect = smtplib.SMTPAuthenticationError('-1',
+                                                                     'The server didn\'t accept '
+                                                                     'the username/password '
+                                                                     'combination.')
+        mock_smtp.return_value = smtp_obj
+
+        # act
+        # assert
+        with self.assertRaises(smtplib.SMTPAuthenticationError) as cm:
+            self.email_service.validate_email_config()
+        self.assertEqual(
+            str(cm.exception.args[1]),
+            'The server didn\'t accept the username/password combination.'
+        )
+
+    @patch('smtplib.SMTP')
+    def test_validate_email_config_smtpnotsupportederror(self, mock_smtp):
+        # arrange
+        smtp_obj = Mock()
+        smtp_obj.login.side_effect = smtplib.SMTPNotSupportedError('SMTP AUTH extension not '
+                                                                   'supported by server.')
+        mock_smtp.return_value = smtp_obj
+
+        # act
+        # assert
+        with self.assertRaises(smtplib.SMTPNotSupportedError) as cm:
+            self.email_service.validate_email_config()
+        self.assertEqual(
+            str(cm.exception.args[0]),
+            'SMTP AUTH extension not supported by server.'
+        )
+
+    @patch('smtplib.SMTP')
+    def test_validate_email_config_smtpexception(self, mock_smtp):
+        # arrange
+        smtp_obj = Mock()
+        smtp_obj.login.side_effect = smtplib.SMTPException('No suitable authentication method found.')
+        mock_smtp.return_value = smtp_obj
+
+        # act
+        # assert
+        with self.assertRaises(smtplib.SMTPException) as cm:
+            self.email_service.validate_email_config()
+        self.assertEqual(
+            str(cm.exception.args[0]),
+            'No suitable authentication method found.'
+        )
+
+    @patch('smtplib.SMTP')
+    def test_validate_email_config_runtimeerror(self, mock_smtp):
+        # arrange
+        smtp_obj = Mock()
+        smtp_obj.login.side_effect = RuntimeError('No SSL support included in this Python.')
+        mock_smtp.return_value = smtp_obj
+
+        # act
+        # assert
+        with self.assertRaises(RuntimeError) as cm:
+            self.email_service.validate_email_config()
+        self.assertEqual(
+            str(cm.exception.args[0]),
+            'No SSL support included in this Python.'
+        )
