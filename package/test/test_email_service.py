@@ -367,7 +367,7 @@ class TestEmailService(unittest.TestCase):
         with self.assertRaises(smtplib.SMTPNotSupportedError) as cm:
             self.email_service._send([to_address], 'Default Subject', arg_html, [cc])
         self.assertEqual(
-            str(cm.exception.args[1]),
+            str(cm.exception.args[0]),
             'One or more source or delivery addresses require internationalized email support, '
             'but the server does not advertise the required SMTPUTF8 capability.'
         )
