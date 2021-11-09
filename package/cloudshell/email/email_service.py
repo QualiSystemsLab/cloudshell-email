@@ -75,10 +75,12 @@ class EmailService:
 
                 if self._email_config.default_subject:
                     self._send(to_email_address, self._email_config.default_subject,
-                               self._email_config.default_html.format(**self._email_config.default_parameters), cc_email_address)
+                               self._email_config.default_html.format(**self._email_config.default_parameters),
+                               cc_email_address)
                 else:
                     self._send(to_email_address, subject,
-                               self._email_config.default_html.format(**self._email_config.default_parameters), cc_email_address)
+                               self._email_config.default_html.format(**self._email_config.default_parameters),
+                               cc_email_address)
             else:
                 if self._email_config.default_subject:
                     self._send(to_email_address, self._email_config.default_subject,
@@ -89,6 +91,36 @@ class EmailService:
         else:
             message = self._load_and_format_template(template_name, **template_parameters)
             self._send(to_email_address, subject, message, cc_email_address)
+
+    def _login(self) -> smtplib.SMTP:
+        try:
+            smtp = smtplib.SMTP(
+                host=self._email_config.smtp_server,
+                port=self._email_config.smtp_port
+            )
+            smtp.ehlo()
+            smtp.starttls()
+            smtp.login(self._email_config.user, self._email_config.password)
+            return smtp
+        except smtplib.SMTPHeloError:
+            self._logger.exception('Failed to login: The server didn’t reply properly '
+                                   'to the helo greeting.')
+            raise
+        except smtplib.SMTPAuthenticationError:
+            self._logger.exception('Failed to login: The server didn’t accept the '
+                                   'username/password combination.')
+            raise
+        except smtplib.SMTPNotSupportedError:
+            self._logger.exception('Failed to login: The AUTH command is not supported '
+                                   'by the server.')
+            raise
+        except smtplib.SMTPException:
+            self._logger.exception('Failed to login: No suitable authentication method was found.')
+            raise
+        except RuntimeError:
+            self._logger.exception('Failed to login: SSL/TLS support is not available '
+                                   'to your Python interpreter.')
+            raise
 
     def _is_valid_email_address(self, email):
         regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
@@ -105,23 +137,30 @@ class EmailService:
         mess = MIMEText(message, 'html')
         msg.attach(mess)
 
+        smtp = self._login()
+
         try:
-            smtp = smtplib.SMTP(
-                host=self._email_config.smtp_server,
-                port=self._email_config.smtp_port
-            )
-            smtp.ehlo()
-            smtp.starttls()
-            smtp.login(self._email_config.user, self._email_config.password)
             smtp.sendmail(
                 from_addr=from_address,
                 to_addrs=[to_address, cc] if cc else to_address,
                 msg=msg.as_string()
             )
+        except smtplib.SMTPRecipientsRefused:
+            self._logger.exception('Failed to send email: All recipients were refused.')
+            raise
+        except smtplib.SMTPSenderRefused:
+            self._logger.exception('Failed to send email: The server didn’t accept the from_addr.')
+            raise
+        except smtplib.SMTPDataError:
+            self._logger.exception('Failed to send email: The server replied with an unexpected '
+                                   'error code.')
+            raise
+        except smtplib.SMTPNotSupportedError:
+            self._logger.exception('Failed to send email: SMTPUTF8 was given in the mail_options '
+                                   'but is not supported by the server.')
+            raise
+        finally:
             smtp.close()
-        except Exception:
-            self._logger.exception(f'Failed to send email to {to_address}')
-            raise Exception(f'Failed to send email to {to_address}')
 
     def _load_and_format_template(self, template_name, **extra_args):
 
@@ -137,3 +176,18 @@ class EmailService:
             raise Exception('Failed loading email template')
 
         return content
+
+    def validate_email_config(self) -> None:
+        """Validates SMTP server configuration.
+
+        Returns:
+            None
+        Raises:
+            smtplib.SMTPHeloError
+            smtplib.SMTPAuthenticationError
+            smtplib.SMTPNotSupportedError
+            smtplib.SMTPException
+            RuntimeError
+        """
+        smtp = self._login()
+        smtp.close()
