@@ -45,6 +45,27 @@ Default values added to the email config object will override these values.
 - template_parameters: Parameter name:values to fill into html template
 - cc_email_address: Email addresses to CC on email
 
+### Validate Email Configuration
+```python
+import smtplib
+
+email_service = EmailService(email_config, sandbox.logger)
+
+try:
+    email_service.validate_email_config()
+except smtplib.SMTPHeloError:
+    # error handling code
+except smtplib.SMTPAuthenticationError:
+    # error handling code
+except smtplib.SMTPNotSupportedError:
+    # error handling code
+except smtplib.SMTPException:
+    # error handling code
+except RuntimeError:
+    # error handling code
+```
+Validate email service configuration using validate_email_config() method.
+
 ### Html Templates
 Html templates will be opened from the template_path on the machine running the orchestration scripts.
 
@@ -84,6 +105,17 @@ template_parameters for the above html would be:
 ```python
 {'variable1': 'Value 1', 'variable2': 'Value 2'}
 ```
+
+### Email Configuration Shell
+
+An email configuration resource can be added to Cloudshell blueprints using the driver included in the email-config-shell folder. 
+
+To install the package: 
+```commandline
+cd shell-config-shell
+shellfoundry install
+```
+When adding this resource to the inventory, Cloudshell will validate the SMTP server configuration defined in its attributes.
 
 ## Troubleshooting and Help
 
