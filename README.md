@@ -115,6 +115,33 @@ To install the package:
 cd shell-config-shell
 shellfoundry install
 ```
+
+This shell is useful to avoid hard coding the configurations and SMTP server authentication details when there is a need to send a custom email during setup/teardown (or any other orchestration flow). The information saved in the Email Configuration resource should be used to initialize the EmailConfig object in the script.
+
+Orchestration script example:
+
+```python
+from cloudshell.workflow.orchestration.sandbox import Sandbox
+from cloudshell.email import EmailConfig, EmailService
+
+sandbox = Sandbox()
+
+session = sandbox.automation_api
+
+resource = sandbox.components.resources['EmailConfigResource']
+
+emailconfig = EmailConfig(
+    session.GetAttributeValue(resource.Name, f'{resource.ResourceModelName}.SMTP Server').Value,
+    session.GetAttributeValue(resource.Name, f'{resource.ResourceModelName}.User').Value,
+    session.DecryptPassword(session.GetAttributeValue(resource.Name,
+                                                      f'{resource.ResourceModelName}.Password').Value).Value,
+    session.GetAttributeValue(resource.Name, f'{resource.ResourceModelName}.From Address').Value,
+    session.GetAttributeValue(resource.Name, f'{resource.ResourceModelName}.SMTP Port').Value
+)
+emailservice = EmailService(emailconfig, sandbox.logger)
+```
+
+
 When adding this resource to the inventory, Cloudshell will validate the SMTP server configuration defined in its attributes.
 
 ## Troubleshooting and Help
