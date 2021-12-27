@@ -128,7 +128,7 @@ sandbox = Sandbox()
 
 session = sandbox.automation_api
 
-resource = sandbox.components.resources['EmailConfigResource']
+resource = session.GetResourceDetails('EmailConfigResource')
 
 emailconfig = EmailConfig(
     session.GetAttributeValue(resource.Name, f'{resource.ResourceModelName}.SMTP Server').Value,
