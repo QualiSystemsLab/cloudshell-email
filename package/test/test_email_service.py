@@ -199,14 +199,19 @@ class TestEmailService(unittest.TestCase):
         self.email_service._send.assert_called_once()
 
     def test_is_valid_email_address_pass(self):
-        valid_email = 'aaa@bbb.com'
+        valid_emails = ["aaa@bbb.com", "a@a-bc.info", "x@y.zz", "x@a123.yy"]
 
-        self.assertTrue(self.email_service._is_valid_email_address(valid_email))
+        for email in valid_emails:
+            self.assertTrue(
+                EmailService.is_valid_email_address(email))
 
     def test_is_valid_email_address_fail(self):
-        invalid_email = 'aaa@bbb'
+        invalid_emails = ["a.b@", "a.b", "ab", "a@b", "@", "@abc.com", "@abc",
+                          "a@a$.com", "a@!.com", "a@sdsd&.com", "a@_.com", "abc@dsds.-com"]
 
-        self.assertFalse(self.email_service._is_valid_email_address(invalid_email))
+        for email in invalid_emails:
+            result = self.email_service.is_valid_email_address(email)
+            self.assertFalse(result)
 
     def test_load_default_template(self):
         # arrange
