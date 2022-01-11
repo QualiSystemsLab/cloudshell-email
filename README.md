@@ -69,7 +69,7 @@ Validate email service configuration using validate_email_config() method.
 ### Html Templates
 Html templates will be opened from the template_path on the machine running the orchestration scripts.
 
-The default html template is if no template_name parameter is given:
+The default html template is used if no template_name parameter is given:
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -108,7 +108,7 @@ template_parameters for the above html would be:
 
 ### Email Configuration Shell
 
-An email configuration resource can be added to Cloudshell blueprints using the driver included in the email-config-shell folder. 
+An email configuration resource can be added to Cloudshell using the shell included in the email-config-shell folder. 
 
 To install the package: 
 ```commandline
@@ -118,7 +118,9 @@ shellfoundry install
 
 This shell is useful to avoid hard coding the configurations and SMTP server authentication details when there is a need to send a custom email during setup/teardown (or any other orchestration flow). The information saved in the Email Configuration resource should be used to initialize the EmailConfig object in the script.
 
-Orchestration script example:
+*Note: When adding this resource to the inventory, Cloudshell will validate the SMTP server configuration defined in its attributes.*
+
+Orchestration script example that uses the Email Config resource:
 
 ```python
 from cloudshell.workflow.orchestration.sandbox import Sandbox
@@ -136,20 +138,42 @@ emailconfig = EmailConfig(
     session.DecryptPassword(session.GetAttributeValue(resource.Name,
                                                       f'{resource.ResourceModelName}.Password').Value).Value,
     session.GetAttributeValue(resource.Name, f'{resource.ResourceModelName}.From Address').Value,
-    session.GetAttributeValue(resource.Name, f'{resource.ResourceModelName}.SMTP Port').Value
+    session.GetAttributeValue(resource.Name, f'{resource.ResourceModelName}.SMTP Port').Value,
+    session.GetAttributeValue(resource.Name, f'{resource.ResourceModelName}.Portal URL').Value
 )
 emailservice = EmailService(emailconfig, sandbox.logger)
 ```
 
+In addition, the EmailConfig object can be initialized using a static factory method that gets the configuration data from an Email Config resource automatically:
+```python
+email_config_resource_name = 'EmailConfigResource'
+email_config = EmailConfig.create_from_email_config_resource(sandbox.automation_api, email_config_resource_name
+email_service = EmailService(email_config, logger)
+```
 
-When adding this resource to the inventory, Cloudshell will validate the SMTP server configuration defined in its attributes.
+
+### Default Error Email
+
+The EmailService class has a shortcut method "send_error_email" that sends a default error email using a template that 
+is based on the standard CloudShell email templates.
+
+Example usage for an error email containing the exception details:
+
+```python
+email_config_resource_name = 'EmailConfigResource'
+email_config = EmailConfig.create_from_email_config_resource(sandbox.automation_api, email_config_resource_name
+email_service = EmailService(email_config, logger, sandbox.automation_api)
+email_service.send_error_email(["admin@sandbox.com"], sandbox.id, get_exc_info=True)
+```
+
+*Note: The send_error_email method requires to initialize the EmailService instance with CloudShellAPISession or an exception will be raised*
 
 ## Troubleshooting and Help
 
-For questions, bug reports or feature requests, please refer to the [Issue Tracker]. Also, make sure you check out our [Issue Template](.github/issue_template.md).
+For questions, bug reports or feature requests, please refer to the [Issue Tracker](https://github.com/QualiSystemsLab/cloudshell-email/issues).
+
 
 ## Contributing
-
 
 All your contributions are welcomed and encouraged.  We've compiled detailed information about:
 

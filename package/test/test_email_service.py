@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, mock_open
+from unittest.mock import patch, mock_open, MagicMock
 
 from mock import Mock, ANY
 
@@ -199,14 +199,19 @@ class TestEmailService(unittest.TestCase):
         self.email_service._send.assert_called_once()
 
     def test_is_valid_email_address_pass(self):
-        valid_email = 'aaa@bbb.com'
+        valid_emails = ["aaa@bbb.com", "a@a-bc.info", "x@y.zz", "x@a123.yy"]
 
-        self.assertTrue(self.email_service._is_valid_email_address(valid_email))
+        for email in valid_emails:
+            self.assertTrue(
+                EmailService.is_valid_email_address(email))
 
     def test_is_valid_email_address_fail(self):
-        invalid_email = 'aaa@bbb'
+        invalid_emails = ["a.b@", "a.b", "ab", "a@b", "@", "@abc.com", "@abc",
+                          "a@a$.com", "a@!.com", "a@sdsd&.com", "a@_.com", "abc@dsds.-com"]
 
-        self.assertFalse(self.email_service._is_valid_email_address(invalid_email))
+        for email in invalid_emails:
+            result = self.email_service.is_valid_email_address(email)
+            self.assertFalse(result)
 
     def test_load_default_template(self):
         # arrange
@@ -476,3 +481,93 @@ class TestEmailService(unittest.TestCase):
             str(cm.exception.args[0]),
             'No SSL support included in this Python.'
         )
+
+    def test_send_error_email_raise_error_no_api(self):
+        with self.assertRaisesRegex(ValueError, "CloudShell Automation API is required"):
+            self.email_service.send_error_email(Mock(), Mock())
+
+    def test_send_error_email(self):
+        # arrange
+        api = Mock()
+        api.GetReservationDetails.return_value.ReservationDescription.TopologiesInfo = MagicMock()
+        self.email_service = EmailService(self.email_config, self.logger, api)
+        self.email_service.send_email = Mock()
+        to_email_address = Mock()
+        sandbox_id = Mock()
+
+        # act
+        self.email_service.send_error_email(to_email_address, sandbox_id)
+
+        # assert
+        self.email_service.send_email.assert_called_once()
+
+    def test_send_error_email_gets_exc_info(self):
+        # arrange
+        api = Mock()
+        api.GetReservationDetails.return_value.ReservationDescription.TopologiesInfo = MagicMock()
+        self.email_service = EmailService(self.email_config, self.logger, api)
+        self.email_service.send_email = Mock()
+        to_email_address = Mock()
+        sandbox_id = Mock()
+
+        # act
+        try:
+            raise ValueError("some error")
+        except:
+            self.email_service.send_error_email(to_email_address, sandbox_id, get_exc_info=True)
+
+        # assert
+        self.email_service.send_email.assert_called_once()
+        self.assertEqual(self.email_service.send_email.call_args.args[3]['ErrorMessage'], "some error")
+
+    def test_send_error_email_can_override_subject(self):
+        # arrange
+        api = Mock()
+        api.GetReservationDetails.return_value.ReservationDescription.TopologiesInfo = MagicMock()
+        self.email_service = EmailService(self.email_config, self.logger, api)
+        self.email_service.send_email = Mock()
+        to_email_address = Mock()
+        sandbox_id = Mock()
+        subject = Mock()
+
+        # act
+        self.email_service.send_error_email(to_email_address, sandbox_id, subject=subject)
+
+        # assert
+        self.email_service.send_email.assert_called_once_with(to_email_address, subject, ANY, ANY, ANY)
+
+    def test_send_error_email_no_sandbox_link(self):
+        # arrange
+        self.email_config.portal_url = None
+        api = Mock()
+        api.GetReservationDetails.return_value.ReservationDescription.TopologiesInfo = MagicMock()
+        self.email_service = EmailService(self.email_config, self.logger, api)
+        self.email_service.send_email = Mock()
+        to_email_address = Mock()
+        sandbox_id = Mock()
+
+        # act
+        self.email_service.send_error_email(to_email_address, sandbox_id)
+
+        # assert
+        self.email_service.send_email.assert_called_once()
+        self.assertEqual(self.email_service.send_email.call_args.args[3]['SandboxLink'], "")
+
+    @patch("cloudshell.email.email_service.build_sandbox_url")
+    def test_send_error_email_with_sandbox_link(self, build_sandbox_url_mock):
+        # arrange
+        build_sandbox_url_mock.return_value = "sandbox_url"
+        api = Mock()
+        api.GetReservationDetails.return_value.ReservationDescription.TopologiesInfo = MagicMock()
+        self.email_service = EmailService(self.email_config, self.logger, api)
+        self.email_service.send_email = Mock()
+        to_email_address = Mock()
+        sandbox_id = Mock()
+
+        # act
+        self.email_service.send_error_email(to_email_address, sandbox_id)
+
+        # assert
+        self.email_service.send_email.assert_called_once()
+        self.assertEqual(self.email_service.send_email.call_args.args[3]['SandboxLink'],
+                         '<a href="sandbox_url">Link to sandbox</a><br/><br/>')
