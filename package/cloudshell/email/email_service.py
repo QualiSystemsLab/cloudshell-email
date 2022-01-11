@@ -1,6 +1,8 @@
 import logging
 import re
 import smtplib
+import sys
+import traceback
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Dict, List
@@ -23,15 +25,27 @@ class EmailService:
     def is_valid_email_address(email: str) -> bool:
         return True if re.fullmatch(VALID_EMAIL_REGEX, email) else False
 
-    def send_error_email(self, to_email_address: List[str], sandbox_id: str, error_message: str, error_details: str,
-                         subject: str = '', cc_email_address: List[str] = []) -> None:
-
+    def send_error_email(self, to_email_address: List[str], sandbox_id: str, subject: str = '', error_message: str = '',
+                         error_details: str = '', get_exc_info: bool = False, cc_email_address: List[str] = []) -> None:
+        """
+        :param get_exc_info: If True will try to get current exception details using sys.exc_info() and
+        'error_message' and 'error_details' parameters will be ignored. If False then 'error_message' and
+        'error_details' parameter values will be used
+        :return:
+        """
         # build sandbox url
         if self._email_config.portal_url:
             sandbox_url = build_sandbox_url(self._email_config.portal_url, sandbox_id)
             sandbox_url_html = f"<a href=\"{sandbox_url}\">Link to sandbox</a><br/><br/>"
         else:
             sandbox_url_html = ''
+
+        # get exception info
+        if get_exc_info:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            err_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            error_details = "<br/>".join(err_lines)
+            error_message = str(exc_value)
 
         template_parameters = {
             "SandboxLink": sandbox_url_html,
