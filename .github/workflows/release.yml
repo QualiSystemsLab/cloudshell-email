@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - "v*.*.*"
 
 jobs:
   Release:
@@ -43,16 +43,24 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f package/requirements.txt ]; then pip install -r package/requirements.txt; fi
           pip install setuptools wheel twine
+          pip install shellfoundry
 
-      - name: Build
+      - name: Build cloudshell-email package
         run: |
           cd package
           python setup.py sdist bdist_wheel
+          
+      - name: Build email-config shell
+        run: |
+          cd email-config-shell
+          shellfoundry dist
 
       - name: Create Release and Upload Artifacts
         uses: softprops/action-gh-release@v1
         with:
-          files: package/dist/*
+          files: |
+            package/dist/*
+            "email-config-shell/dist/Email Config Shell.zip"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
