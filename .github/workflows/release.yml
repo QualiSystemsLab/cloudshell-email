@@ -60,7 +60,7 @@ jobs:
         with:
           files: |
             package/dist/*
-            "email-config-shell/dist/Email Config Shell.zip"
+            email-config-shell/dist/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
