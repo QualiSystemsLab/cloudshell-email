@@ -482,6 +482,17 @@ class TestEmailService(unittest.TestCase):
             'No SSL support included in this Python.'
         )
 
+    @patch('smtplib.SMTP')
+    def test_validate_email_config_no_username_and_password(self, mock_smtp):
+        # arrange
+        smtp_obj = Mock()
+        mock_smtp.return_value = smtp_obj
+
+        # act
+        self.email_service.validate_email_config()
+        # assert
+        assert not mock_smtp.return_value.login.called
+
     def test_send_error_email_raise_error_no_api(self):
         with self.assertRaisesRegex(ValueError, "CloudShell Automation API is required"):
             self.email_service.send_error_email(Mock(), Mock())
