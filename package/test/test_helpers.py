@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import Mock
 
-from cloudshell.email.email_helpers import get_resource_attribute_value, build_sandbox_url
+from cloudshell.email.email_helpers import get_resource_attribute_value, build_sandbox_url, \
+    convert_attribute_value_to_bool
 
 
 class TestHelpers(unittest.TestCase):
@@ -40,6 +41,16 @@ class TestHelpers(unittest.TestCase):
 
         # assert
         self.assertEqual(f"{portal_base_url}/RM/Diagram/Index/{sandbox_id}", sandbox_url)
+
+    def test_convert_attribute_value_to_bool_from_string(self):
+        # arrange
+        value = "True"
+
+        # act
+        result = convert_attribute_value_to_bool(value)
+
+        # assert
+        self.assertEqual(result, True)
 
     # region test helpers
 
