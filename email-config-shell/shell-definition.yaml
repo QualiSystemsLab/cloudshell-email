@@ -29,6 +29,10 @@ node_types:
       Portal URL:
         type: string
         description: Portal URL
+      Disable SMTP Auth:
+        type: boolean
+        default: false
+        description: Disable SMTP Authentication. Shell will not invoke Login and Username and Password will be ignored.
     capabilities:
       auto_discovery_capability:
         type: cloudshell.capabilities.AutoDiscovery
@@ -57,6 +61,9 @@ node_types:
           hide_address:
             type: string
             default: true
+          Disable SMTP Auth:
+            type: boolean
+            default: false
     artifacts:
       icon:
         file: shell-icon.png

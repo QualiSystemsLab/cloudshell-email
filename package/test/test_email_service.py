@@ -71,7 +71,7 @@ args_html = '''
 class TestEmailService(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.email_config = Mock()
+        self.email_config = Mock(disable_smtp_auth=False)
         self.logger = Mock()
         self.email_service = EmailService(self.email_config, self.logger)
 
@@ -483,11 +483,11 @@ class TestEmailService(unittest.TestCase):
         )
 
     @patch('smtplib.SMTP')
-    def test_validate_email_config_no_username_and_password(self, mock_smtp):
+    def test_validate_email_config_disable_smtp_auth(self, mock_smtp):
         # arrange
         smtp_obj = Mock()
+        self.email_service._email_config.disable_smtp_auth = True
         mock_smtp.return_value = smtp_obj
-
         # act
         self.email_service.validate_email_config()
         # assert

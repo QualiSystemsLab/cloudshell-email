@@ -23,3 +23,7 @@ def build_email_template_full_path(template_name: str, base_path: str = __file__
 
 def build_sandbox_url(portal_url: str, sandbox_id: str) -> str:
     return urljoin(str(portal_url), f"RM/Diagram/Index/{sandbox_id}")
+
+
+def convert_attribute_value_to_bool(attribute_value) -> bool:
+    return True if str(attribute_value).lower() == "true" else False
