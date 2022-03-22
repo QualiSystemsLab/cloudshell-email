@@ -138,7 +138,11 @@ class EmailService:
             )
             smtp.ehlo()
             smtp.starttls()
-            smtp.login(self._email_config.user, self._email_config.password)
+            if self._email_config.disable_smtp_auth:
+                self._logger.info("Skipping Authenticating as 'Disable SMTP Auth' is set to True")
+
+            else:
+                smtp.login(self._email_config.user, self._email_config.password)
             return smtp
         except smtplib.SMTPHeloError:
             self._logger.exception('Failed to login: The server didn’t reply properly '

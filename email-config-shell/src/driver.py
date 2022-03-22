@@ -31,8 +31,11 @@ class EmailConfigShellDriver (ResourceDriverInterface):
         """
         pass
 
-    # <editor-fold desc="Discovery">
+    @staticmethod
+    def _convert_attribute_value_to_bool(attribute_value):
+        return True if str(attribute_value).lower() == "true" else False
 
+    # <editor-fold desc="Discovery">
     def get_inventory(self, context):
         """
         Discovers the resource structure and attributes.
@@ -50,7 +53,8 @@ class EmailConfigShellDriver (ResourceDriverInterface):
                     email_config_shell.user,
                     decrypted_password,
                     email_config_shell.from_address,
-                    email_config_shell.smtp_port
+                    email_config_shell.smtp_port,
+                    disable_smtp_auth=self._convert_attribute_value_to_bool(email_config_shell.disable_smtp_auth)
                 )
                 emailservice = EmailService(emailconfig, logger)
                 emailservice.validate_email_config()

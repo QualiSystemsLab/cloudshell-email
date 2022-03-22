@@ -3,13 +3,13 @@ from typing import Dict
 
 from cloudshell.api.cloudshell_api import CloudShellAPISession
 
-from cloudshell.email.email_helpers import get_resource_attribute_value
+from cloudshell.email.email_helpers import get_resource_attribute_value, convert_attribute_value_to_bool
 
 
 class EmailConfig:
     def __init__(self, smtp_server: str, user: str, password: str, from_address: str, smtp_port=587,
                  portal_url: str = '', default_subject: str = '', default_html: str = '',
-                 default_parameters: Dict[str, str] = {}):
+                 default_parameters: Dict[str, str] = {}, disable_smtp_auth: bool = False):
         """
         :param smtp_server:
         :param user: must in an email_service address format
@@ -26,6 +26,7 @@ class EmailConfig:
         self.default_subject = default_subject
         self.default_html = default_html
         self.default_parameters = default_parameters
+        self.disable_smtp_auth = disable_smtp_auth
 
     @staticmethod
     def create_from_email_config_resource(api: CloudShellAPISession, email_config_resource_name: str) -> EmailConfig:
@@ -38,5 +39,7 @@ class EmailConfig:
         password_encrypted = get_resource_attribute_value(config_resource, "Password")
         password = api.DecryptPassword(password_encrypted).Value
         portal_url = get_resource_attribute_value(config_resource, "Portal URL")
-
-        return EmailConfig(smtp_server, user, password, from_address, smtp_port, portal_url)
+        disable_smtp_auth = convert_attribute_value_to_bool(get_resource_attribute_value(config_resource,
+                                                                                         "Disable SMTP Auth"))
+        return EmailConfig(smtp_server, user, password, from_address, smtp_port, portal_url,
+                           disable_smtp_auth=disable_smtp_auth)

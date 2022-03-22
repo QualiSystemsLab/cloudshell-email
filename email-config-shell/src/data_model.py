@@ -215,6 +215,21 @@ class EmailConfigShell(object):
         self.attributes['Email Config Shell.Portal URL'] = value
 
     @property
+    def disable_smtp_auth(self):
+        """
+        :rtype: str
+        """
+        return self.attributes['Email Config Shell.Disable SMTP Auth'] if 'Email Config Shell.Disable SMTP Auth' in self.attributes else None
+
+    @disable_smtp_auth.setter
+    def disable_smtp_auth(self, value=False):
+        """
+        Disable SMTP Auth
+        :type value: str
+        """
+        self.attributes['Email Config Shell.Disable SMTP Auth'] = value
+
+    @property
     def user(self):
         """
         :rtype: str
