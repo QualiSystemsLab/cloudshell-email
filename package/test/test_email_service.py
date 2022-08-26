@@ -285,6 +285,25 @@ class TestEmailService(unittest.TestCase):
         mock_smtp.return_value.sendmail.assert_called_once()
         mock_smtp.return_value.close.assert_called_once()
 
+    @patch('cloudshell.email.email_service.MIMEMultipart')
+    @patch('smtplib.SMTP')
+    def test_send_with_embedded_header(self, mock_smtp, msg_mock_class):
+        # arrange
+        msg_mock = MagicMock()
+        msg_mock_class.return_value = msg_mock
+        email = 'aaa@bbb.com'
+        self.email_service._email_config.from_address = 'aaa@bbb.com'
+        subject = 'embedded\nheader: attack'
+
+        mock_smtp.return_value = Mock()
+
+        # act
+        self.email_service._send([email], subject, arg_html, [email])
+
+        # assert
+        subject_modified = next(filter(lambda x: x.args[0] == "Subject", msg_mock.mock_calls), None).args[1]
+        self.assertEqual(subject_modified, 'embedded header: attack')
+
     @patch('smtplib.SMTP')
     def test_send_smtprecipientsrefused(self, mock_smtp):
         # arrange

@@ -28,6 +28,12 @@ class EmailService:
     def send_error_email(self, to_email_address: List[str], sandbox_id: str, subject: str = '', error_message: str = '',
                          error_details: str = '', get_exc_info: bool = False, cc_email_address: List[str] = []) -> None:
         """
+        :param error_details: the error details (i.e. stack trace)
+        :param cc_email_address: list of valid email address
+        :param error_message: the error message (short message)
+        :param subject: subject line for the email. If empty a default subject will be used.
+        :param sandbox_id: sandbox id where the error was originated
+        :param to_email_address: list of valid email address
         :param get_exc_info: If True will try to get current exception details using sys.exc_info() and
         'error_message' and 'error_details' parameters will be ignored. If False then 'error_message' and
         'error_details' parameter values will be used
@@ -169,7 +175,8 @@ class EmailService:
         msg = MIMEMultipart('alternative')
         msg['From'] = ';'.join(from_address) if isinstance(from_address, list) else from_address
         msg['To'] = ';'.join(to_address) if isinstance(to_address, list) else to_address
-        msg['Subject'] = subject
+        # https://stackoverflow.com/questions/52812936/email-errors-headerparseerror-header-value-appears-to-contain-an-embedded-heade
+        msg['Subject'] = subject.replace("\n", " ")
         if cc:
             msg["Cc"] = ';'.join(cc) if isinstance(cc, list) else cc
         mess = MIMEText(message, 'html')
